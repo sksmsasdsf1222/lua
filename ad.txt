@@ -1,0 +1,329 @@
+local player = game.Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+local UIS = game:GetService("UserInputService")
+
+-- 드래그 가능한 창 생성 함수
+local function makeDraggable(frame)
+    local dragging
+    local dragInput
+    local dragStart
+    local startPos
+
+    local function updateInput(input)
+        if dragging then
+            local delta = input.Position - dragStart
+            frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end
+
+    frame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = frame.Position
+            input.InputChanged:Connect(updateInput)
+        end
+    end)
+
+    frame.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+end
+
+-- 닫기 버튼 추가 함수
+local function addCloseButton(frame)
+    local closeButton = Instance.new("TextButton")
+    closeButton.Size = UDim2.new(0.1, 0, 0.1, 0)
+    closeButton.Position = UDim2.new(1, -50, 0, 10)
+    closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    closeButton.BorderSizePixel = 0
+    closeButton.Text = "X"
+    closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    closeButton.Font = Enum.Font.SourceSansBold
+    closeButton.TextSize = 24
+    closeButton.Parent = frame
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 12)
+    corner.Parent = closeButton
+
+    closeButton.MouseButton1Click:Connect(function()
+        frame:Destroy()
+    end)
+end
+
+-- 비밀번호 입력창 생성 함수
+local function createInputFrame()
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "InputGui"
+    screenGui.Parent = playerGui
+
+    local inputFrame = Instance.new("Frame")
+    inputFrame.Size = UDim2.new(0.4, 0, 0.3, 0)
+    inputFrame.Position = UDim2.new(0.3, 0, 0.35, 0)
+    inputFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    inputFrame.BorderSizePixel = 0
+    inputFrame.Parent = screenGui
+
+    -- 곡선 추가
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 12)
+    corner.Parent = inputFrame
+
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Size = UDim2.new(1, 0, 0.2, 0)
+    titleLabel.Position = UDim2.new(0, 0, 0, 0)
+    titleLabel.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    titleLabel.Text = "비밀번호 입력"
+    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleLabel.Font = Enum.Font.SourceSans
+    titleLabel.TextSize = 20
+    titleLabel.Parent = inputFrame
+
+    local passwordBox = Instance.new("TextBox")
+    passwordBox.Size = UDim2.new(0.9, 0, 0.2, 0)
+    passwordBox.Position = UDim2.new(0.05, 0, 0.25, 0)
+    passwordBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    passwordBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    passwordBox.Font = Enum.Font.SourceSans
+    passwordBox.TextSize = 18
+    passwordBox.ClearTextOnFocus = false
+    passwordBox.Text = ""
+    passwordBox.Parent = inputFrame
+
+    local submitButton = Instance.new("TextButton")
+    submitButton.Size = UDim2.new(0.9, 0, 0.2, 0)
+    submitButton.Position = UDim2.new(0.05, 0, 0.5, 0)
+    submitButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+    submitButton.Text = "확인"
+    submitButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    submitButton.Font = Enum.Font.SourceSans
+    submitButton.TextSize = 18
+    submitButton.Parent = inputFrame
+
+    local function showSuccessMessage()
+        local successGui = Instance.new("ScreenGui")
+        successGui.Name = "SuccessGui"
+        successGui.Parent = playerGui
+
+        local successFrame = Instance.new("Frame")
+        successFrame.Size = UDim2.new(0.5, 0, 0.1, 0)
+        successFrame.Position = UDim2.new(0.25, 0, 0, 0)
+        successFrame.BackgroundColor3 = Color3.fromRGB(0, 128, 0) -- 초록색
+        successFrame.BorderSizePixel = 0
+        successFrame.Parent = successGui
+
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(0, 12)
+        corner.Parent = successFrame
+
+        local messageLabel = Instance.new("TextLabel")
+        messageLabel.Size = UDim2.new(1, 0, 1, 0)
+        messageLabel.Position = UDim2.new(0, 0, 0, 0)
+        messageLabel.BackgroundTransparency = 1
+        messageLabel.Text = "성공적으로 등록이 완료 되었습니다."
+        messageLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        messageLabel.Font = Enum.Font.SourceSansBold
+        messageLabel.TextSize = 20
+        messageLabel.TextWrapped = true
+        messageLabel.TextXAlignment = Enum.TextXAlignment.Center
+        messageLabel.TextYAlignment = Enum.TextYAlignment.Center
+        messageLabel.Parent = successFrame
+
+        -- 3초 후 메시지 창 자동으로 제거
+        wait(3)
+        successGui:Destroy()
+        -- 3초 후 메인 창 생성
+        createMainWindow()
+    end
+
+    local function handleSubmit()
+        if passwordBox.Text == "1234" then
+            -- 비밀번호 입력 성공 시 성공 메시지 표시
+            showSuccessMessage()
+            -- 비밀번호 입력 창 제거
+            screenGui:Destroy()
+        else
+            -- 입력 오류 메시지 표시
+            local errorLabel = Instance.new("TextLabel")
+            errorLabel.Size = UDim2.new(1, 0, 0.2, 0)
+            errorLabel.Position = UDim2.new(0, 0, 0.75, 0)
+            errorLabel.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+            errorLabel.Text = "비밀번호가 올바르지 않습니다."
+            errorLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            errorLabel.Font = Enum.Font.SourceSans
+            errorLabel.TextSize = 18
+            errorLabel.Parent = inputFrame
+        end
+    end
+
+    submitButton.MouseButton1Click:Connect(handleSubmit)
+
+    -- 비밀번호 입력창 드래그 가능
+    makeDraggable(inputFrame)
+end
+
+-- 메인 창 생성 함수
+local function createMainWindow()
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "MainGui"
+    screenGui.Parent = playerGui
+
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(0.5, 0, 0.5, 0)
+    mainFrame.Position = UDim2.new(0.25, 0, 0.25, 0)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(240, 240, 240) -- 회색 배경
+    mainFrame.BorderSizePixel = 0
+    mainFrame.Parent = screenGui
+
+    -- 곡선 추가
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 12)
+    corner.Parent = mainFrame
+
+    -- 닫기 버튼 추가
+    addCloseButton(mainFrame)
+
+    -- 좌측 패널
+    local sidePanel = Instance.new("Frame")
+    sidePanel.Size = UDim2.new(0.2, 0, 1, 0)
+    sidePanel.Position = UDim2.new(0, 0, 0, 0)
+    sidePanel.BackgroundColor3 = Color3.fromRGB(200, 200, 200) -- 밝은 회색
+    sidePanel.BorderSizePixel = 0
+    sidePanel.Parent = mainFrame
+
+    -- 버튼 컨테이너
+    local buttonContainer = Instance.new("Frame")
+    buttonContainer.Size = UDim2.new(1, 0, 1, 0)
+    buttonContainer.Position = UDim2.new(0, 0, 0, 0)
+    buttonContainer.BackgroundTransparency = 1
+    buttonContainer.Parent = sidePanel
+
+    local uiListLayout = Instance.new("UIListLayout")
+    uiListLayout.FillDirection = Enum.FillDirection.Vertical
+    uiListLayout.Padding = UDim.new(0, 10)
+    uiListLayout.Parent = buttonContainer
+
+    local function createButton(name, callback)
+        local button = Instance.new("TextButton")
+        button.Size = UDim2.new(1, 0, 0.1, 0)
+        button.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+        button.Text = name
+        button.TextColor3 = Color3.fromRGB(255, 255, 255)
+        button.Font = Enum.Font.SourceSans
+        button.TextSize = 18
+        button.Parent = buttonContainer
+
+        button.MouseButton1Click:Connect(callback)
+
+        return button
+    end
+
+    -- 버튼 추가
+    createButton("기본기능", function()
+        print("기본기능 버튼 클릭됨")
+        local featuresGui = Instance.new("ScreenGui")
+        featuresGui.Name = "FeaturesGui"
+        featuresGui.Parent = playerGui
+
+        local featuresFrame = Instance.new("Frame")
+        featuresFrame.Size = UDim2.new(0.5, 0, 0.3, 0)
+        featuresFrame.Position = UDim2.new(0.25, 0, 0.35, 0)
+        featuresFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        featuresFrame.BorderSizePixel = 0
+        featuresFrame.Parent = featuresGui
+
+        -- 곡선 추가
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(0, 12)
+        corner.Parent = featuresFrame
+
+        addCloseButton(featuresFrame)
+
+        local featuresList = Instance.new("Frame")
+        featuresList.Size = UDim2.new(1, 0, 1, 0)
+        featuresList.Position = UDim2.new(0, 0, 0, 0)
+        featuresList.BackgroundTransparency = 1
+        featuresList.Parent = featuresFrame
+
+        local uiListLayout = Instance.new("UIListLayout")
+        uiListLayout.FillDirection = Enum.FillDirection.Horizontal
+        uiListLayout.Padding = UDim.new(0, 10)
+        uiListLayout.Parent = featuresList
+
+        local function createFeatureButton(name, callback)
+            local button = Instance.new("TextButton")
+            button.Size = UDim2.new(0.3, 0, 1, 0)
+            button.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+            button.Text = name
+            button.TextColor3 = Color3.fromRGB(255, 255, 255)
+            button.Font = Enum.Font.SourceSans
+            button.TextSize = 18
+            button.Parent = featuresList
+
+            button.MouseButton1Click:Connect(callback)
+
+            return button
+        end
+
+        createFeatureButton("벽뚫기", function()
+            print("벽뚫기 기능 활성화")
+            -- 벽뚫기 기능 구현
+        end)
+
+        createFeatureButton("날기", function()
+            print("날기 기능 활성화")
+            -- 날기(fly) 기능 구현
+        end)
+
+        createFeatureButton("투명화", function()
+            print("투명화 기능 활성화")
+            -- 투명화 기능 구현
+        end)
+
+        makeDraggable(featuresFrame)
+    end)
+
+    createButton("팽 부대", function()
+        print("팽 부대 버튼 클릭됨")
+        -- 팽 부대 버튼 클릭 시 동작
+    end)
+
+    createButton("밥밥 부대", function()
+        print("밥밥 부대 버튼 클릭됨")
+        -- 밥밥 부대 버튼 클릭 시 동작
+    end)
+
+    createButton("태비 부대", function()
+        print("태비 부대 버튼 클릭됨")
+        -- 태비 부대 버튼 클릭 시 동작
+    end)
+
+    createButton("샤크 부대", function()
+        print("샤크 부대 버튼 클릭됨")
+        -- 샤크 부대 버튼 클릭 시 동작
+    end)
+
+    createButton("프리즌 라이프", function()
+        print("프리즌 라이프 버튼 클릭됨")
+        -- 프리즌 라이프 버튼 클릭 시 동작
+    end)
+
+    createButton("아스널", function()
+        print("아스널 버튼 클릭됨")
+        -- 아스널 버튼 클릭 시 동작
+    end)
+
+    createButton("스크립트 모음", function()
+        print("스크립트 모음 버튼 클릭됨")
+        -- 스크립트 모음 버튼 클릭 시 동작
+    end)
+
+    -- 메인 창 드래그 가능
+    makeDraggable(mainFrame)
+end
+
+-- 초기화 함수 호출
+createInputFrame()
