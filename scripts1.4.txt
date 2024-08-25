@@ -1,0 +1,308 @@
+-- 로블록스 서비스 가져오기
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+local UIS = game:GetService("UserInputService")
+
+-- 기본 크기 설정
+local originalSize = UDim2.new(0, 500, 0, 300)
+local minimizedSize = UDim2.new(0, 250, 0, 50)
+
+-- 메인 프레임 생성
+local function createMainFrame()
+    local frame = Instance.new("Frame")
+    frame.Size = originalSize
+    frame.Position = UDim2.new(0.5, -250, 0.45, -150) -- Y 위치를 0.45로 수정하여 위로 올림
+    frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    frame.BorderSizePixel = 0
+    frame.Active = true
+    frame.Draggable = true
+    frame.Parent = playerGui:FindFirstChildOfClass("ScreenGui")
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 10)
+    corner.Parent = frame
+
+    return frame
+end
+
+-- 상단 타이틀바 및 닫기 버튼 생성
+local function createTitleBar(frame)
+    local titleBar = Instance.new("Frame")
+    titleBar.Size = UDim2.new(1, 0, 0, 30)
+    titleBar.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    titleBar.Parent = frame
+
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Size = UDim2.new(1, -70, 1, 0) -- 1, -70로 수정하여 디스코드 아이콘 공간 확보
+    titleLabel.Position = UDim2.new(0, 10, 0, 0)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Text = "[ KR ] Narlum Hub"
+    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleLabel.Font = Enum.Font.SourceSansBold
+    titleLabel.TextSize = 18
+    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    titleLabel.Parent = titleBar
+
+    -- 디스코드 버튼 생성
+    local discordButton = Instance.new("ImageButton")
+    discordButton.Size = UDim2.new(0, 30, 0, 30)
+    discordButton.Position = UDim2.new(1, -60, 0, 0)
+    discordButton.BackgroundTransparency = 1
+    discordButton.Image = "rbxassetid://11417942820" -- 디스코드 아이콘 이미지 ID
+    discordButton.Parent = titleBar
+
+    discordButton.MouseButton1Click:Connect(function()
+        local url = "https://discord.gg/H88xeCUXKU"
+        game:GetService("GuiService"):OpenBrowserWindow(url)
+    end)
+
+    -- 닫기 버튼 생성
+    local closeButton = Instance.new("TextButton")
+    closeButton.Size = UDim2.new(0, 30, 0, 30)
+    closeButton.Position = UDim2.new(1, -30, 0, 0)
+    closeButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+    closeButton.Text = "X"
+    closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    closeButton.Font = Enum.Font.SourceSansBold
+    closeButton.TextSize = 18
+    closeButton.Parent = titleBar
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = closeButton
+
+    return titleBar, closeButton
+end
+
+-- 상단 버튼 생성
+local function createTopButton(text, position, callback, parentFrame)
+    local button = Instance.new("TextButton")
+    button.Size = UDim2.new(0, 150, 0, 30)  -- 버튼 너비 조정
+    button.Position = position
+    button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    button.Text = text
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.Font = Enum.Font.SourceSans
+    button.TextSize = 14
+    button.Parent = parentFrame
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = button
+
+    button.MouseButton1Click:Connect(callback)
+end
+
+-- 콘텐츠 프레임 생성
+local function createContentFrame(name, parentFrame)
+    local frame = Instance.new("Frame")
+    frame.Name = name
+    frame.Size = UDim2.new(0.65, -20, 1, -90)  -- 너비 65% 화면
+    frame.Position = UDim2.new(0.35, 10, 0, 80)
+    frame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    frame.BorderSizePixel = 0
+    frame.Visible = false
+    frame.Parent = parentFrame
+
+    return frame
+end
+
+-- 스크롤 가능 프레임 생성
+local function createScrollingFrame(parentFrame)
+    local scrollingFrame = Instance.new("ScrollingFrame")
+    scrollingFrame.Size = UDim2.new(0.35, -10, 1, -40)  -- 너비 35% 화면, 높이 100%
+    scrollingFrame.Position = UDim2.new(0, 10, 0, 40)
+    scrollingFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    scrollingFrame.BorderSizePixel = 0
+    scrollingFrame.CanvasSize = UDim2.new(0, 0, 1, 0)
+    scrollingFrame.ScrollBarThickness = 6
+    scrollingFrame.Parent = parentFrame
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 10)
+    corner.Parent = scrollingFrame
+
+    return scrollingFrame
+end
+
+-- 메인 프레임 및 UI 요소 생성
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "CustomGui"
+screenGui.Parent = playerGui
+
+local mainFrame = createMainFrame()
+local titleBar, closeButton = createTitleBar(mainFrame)
+
+-- 스크롤 가능 프레임 생성
+local scrollingFrame = createScrollingFrame(mainFrame)
+
+-- 콘텐츠 프레임 생성
+local frames = {
+    basicFeaturesFrame = createContentFrame("BasicFeaturesFrame", mainFrame),
+    pangBudaeFrame = createContentFrame("PangBudaeFrame", mainFrame),
+    babbabFrame = createContentFrame("BabbabFrame", mainFrame),
+    tabbyBudaeFrame = createContentFrame("TabbyBudaeFrame", mainFrame),
+    sharkBudaeFrame = createContentFrame("SharkBudaeFrame", mainFrame),
+    prisonLifeFrame = createContentFrame("PrisonLifeFrame", mainFrame),
+    astralFrame = createContentFrame("AstralFrame", mainFrame),
+    scriptCollectionFrame = createContentFrame("ScriptCollectionFrame", mainFrame)
+}
+
+-- 상단 버튼 및 이벤트 핸들러 설정
+local buttonHeight = 30
+local buttonSpacing = 10  -- 버튼 간 간격
+
+local function toggleContentFrame(frameName)
+    for _, frame in pairs(frames) do
+        frame.Visible = frame.Name == frameName
+    end
+end
+
+createTopButton("기본 기능", UDim2.new(0, 10, 0, 40), function()
+    toggleContentFrame("BasicFeaturesFrame")
+
+    -- 투명인간 및 하늘 날기 기능 버튼 생성
+    local toggleButton1 = Instance.new("TextButton")
+    toggleButton1.Size = UDim2.new(0, 120, 0, 30)
+    toggleButton1.Position = UDim2.new(0, 10, 0, 40)
+    toggleButton1.BackgroundTransparency = 0
+    toggleButton1.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+    toggleButton1.Text = "투명인간 (OFF)"
+    toggleButton1.TextColor3 = Color3.fromRGB(255, 255, 255)
+    toggleButton1.Parent = frames.basicFeaturesFrame
+
+    local corner1 = Instance.new("UICorner")
+    corner1.CornerRadius = UDim.new(0, 8)
+    corner1.Parent = toggleButton1
+
+    local isInvisible = false
+
+    toggleButton1.MouseButton1Click:Connect(function()
+        isInvisible = not isInvisible
+        if isInvisible then
+            player.Character.HumanoidRootPart.Transparency = 0.5
+            for _, part in ipairs(player.Character:GetChildren()) do
+                if part:IsA("BasePart") then
+                    part.Transparency = 1
+                end
+            end
+            toggleButton1.Text = "투명인간 (ON)"
+        else
+            player.Character.HumanoidRootPart.Transparency = 0
+            for _, part in ipairs(player.Character:GetChildren()) do
+                if part:IsA("BasePart") then
+                    part.Transparency = 0
+                end
+            end
+            toggleButton1.Text = "투명인간 (OFF)"
+        end
+    end)
+
+    -- 하늘 날기 기능 버튼 생성
+    local toggleButton2 = Instance.new("TextButton")
+    toggleButton2.Size = UDim2.new(0, 120, 0, 30)
+    toggleButton2.Position = UDim2.new(0, 10, 0, 80)
+    toggleButton2.BackgroundTransparency = 0
+    toggleButton2.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+    toggleButton2.Text = "하늘 날기 (OFF)"
+    toggleButton2.TextColor3 = Color3.fromRGB(255, 255, 255)
+    toggleButton2.Parent = frames.basicFeaturesFrame
+
+    local corner2 = Instance.new("UICorner")
+    corner2.CornerRadius = UDim.new(0, 8)
+    corner2.Parent = toggleButton2
+
+    local isFlying = false
+
+    toggleButton2.MouseButton1Click:Connect(function()
+        isFlying = not isFlying
+        if isFlying then
+            local bodyGyro = Instance.new("BodyGyro", player.Character.HumanoidRootPart)
+            bodyGyro.CFrame = player.Character.HumanoidRootPart.CFrame
+            bodyGyro.MaxTorque = Vector3.new(400000, 400000, 400000)
+            bodyGyro.P = 3000
+
+            local bodyVelocity = Instance.new("BodyVelocity", player.Character.HumanoidRootPart)
+            bodyVelocity.Velocity = Vector3.new(0, 50, 0)
+            bodyVelocity.MaxForce = Vector3.new(400000, 400000, 400000)
+
+            toggleButton2.Text = "하늘 날기 (ON)"
+        else
+            player.Character.HumanoidRootPart:FindFirstChildOfClass("BodyGyro"):Destroy()
+            player.Character.HumanoidRootPart:FindFirstChildOfClass("BodyVelocity"):Destroy()
+            toggleButton2.Text = "하늘 날기 (OFF)"
+        end
+    end)
+end, scrollingFrame)
+
+createTopButton("팽 부대", UDim2.new(0, 10, 0, 80), function()
+    toggleContentFrame("PangBudaeFrame")
+end, scrollingFrame)
+
+createTopButton("밥밥 부대", UDim2.new(0, 10, 0, 120), function()
+    toggleContentFrame("BabbabFrame")
+end, scrollingFrame)
+
+createTopButton("태비 부대", UDim2.new(0, 10, 0, 160), function()
+    toggleContentFrame("TabbyBudaeFrame")
+end, scrollingFrame)
+
+createTopButton("샤크 부대", UDim2.new(0, 10, 0, 200), function()
+    toggleContentFrame("SharkBudaeFrame")
+end, scrollingFrame)
+
+createTopButton("프리즌 라이프", UDim2.new(0, 10, 0, 240), function()
+    toggleContentFrame("PrisonLifeFrame")
+end, scrollingFrame)
+
+createTopButton("아스털", UDim2.new(0, 10, 0, 280), function()
+    toggleContentFrame("AstralFrame")
+end, scrollingFrame)
+
+createTopButton("스크립트 모음", UDim2.new(0, 10, 0, 320), function()
+    toggleContentFrame("ScriptCollectionFrame")
+end, scrollingFrame)
+
+-- 창 이동 기능
+local dragging = false
+local dragStart, startPos
+
+local function update(input)
+    if dragging then
+        local delta = input.Position - dragStart
+        mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end
+
+titleBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = mainFrame.Position
+
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+UIS.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        update(input)
+    end
+end)
+
+-- 창 최소화/확대 기능
+local minimized = false
+closeButton.MouseButton1Click:Connect(function()
+    if minimized then
+        mainFrame:TweenSize(originalSize, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.5, true)
+        minimized = false
+    else
+        mainFrame:TweenSize(minimizedSize, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.5, true)
+        minimized = true
+    end
+end)
