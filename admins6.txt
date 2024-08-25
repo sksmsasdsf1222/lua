@@ -1,0 +1,211 @@
+local player = game.Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+local UIS = game:GetService("UserInputService")
+
+-- 입력 확인 창 생성 함수
+local function createInputFrame()
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "InputGui"
+    screenGui.Parent = playerGui
+
+    local inputFrame = Instance.new("Frame")
+    inputFrame.Size = UDim2.new(0.4, 0, 0.3, 0)
+    inputFrame.Position = UDim2.new(0.3, 0, 0.35, 0)
+    inputFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    inputFrame.BorderSizePixel = 0
+    inputFrame.Parent = screenGui
+
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Size = UDim2.new(1, 0, 0.2, 0)
+    titleLabel.Position = UDim2.new(0, 0, 0, 0)
+    titleLabel.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    titleLabel.Text = "비밀번호 입력"
+    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleLabel.Font = Enum.Font.SourceSans
+    titleLabel.TextSize = 20
+    titleLabel.Parent = inputFrame
+
+    local passwordBox = Instance.new("TextBox")
+    passwordBox.Size = UDim2.new(0.9, 0, 0.2, 0)
+    passwordBox.Position = UDim2.new(0.05, 0, 0.25, 0)
+    passwordBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    passwordBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    passwordBox.Font = Enum.Font.SourceSans
+    passwordBox.TextSize = 18
+    passwordBox.ClearTextOnFocus = false
+    passwordBox.Text = ""
+    passwordBox.Parent = inputFrame
+
+    local submitButton = Instance.new("TextButton")
+    submitButton.Size = UDim2.new(0.9, 0, 0.2, 0)
+    submitButton.Position = UDim2.new(0.05, 0, 0.5, 0)
+    submitButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+    submitButton.Text = "확인"
+    submitButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    submitButton.Font = Enum.Font.SourceSans
+    submitButton.TextSize = 18
+    submitButton.Parent = inputFrame
+
+    local function handleSubmit()
+        if passwordBox.Text == "1234" then
+            -- 입력 확인 창 제거
+            screenGui:Destroy()
+            print("Password correct. Creating main UI...")
+            -- 메인 UI 생성
+            createMainUI()
+        else
+            -- 입력 오류 메시지 표시
+            local errorLabel = Instance.new("TextLabel")
+            errorLabel.Size = UDim2.new(1, 0, 0.2, 0)
+            errorLabel.Position = UDim2.new(0, 0, 0.75, 0)
+            errorLabel.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+            errorLabel.Text = "비밀번호가 올바르지 않습니다."
+            errorLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            errorLabel.Font = Enum.Font.SourceSans
+            errorLabel.TextSize = 18
+            errorLabel.Parent = inputFrame
+        end
+    end
+
+    submitButton.MouseButton1Click:Connect(handleSubmit)
+end
+
+-- 메인 UI 생성 함수
+local function createMainUI()
+    print("Creating main UI...")
+    local existingGui = playerGui:FindFirstChild("MainGui")
+    if existingGui then
+        existingGui:Destroy() -- 기존 UI가 있으면 제거
+    end
+
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "MainGui"
+    screenGui.Parent = playerGui
+
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(0.6, 0, 0.6, 0)
+    mainFrame.Position = UDim2.new(0.2, 0, 0.2, 0)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    mainFrame.BorderSizePixel = 0
+    mainFrame.Active = true
+    mainFrame.Draggable = true
+    mainFrame.Parent = screenGui
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 10)
+    corner.Parent = mainFrame
+
+    -- 상단 타이틀바 및 닫기 버튼 생성
+    local titleBar = Instance.new("Frame")
+    titleBar.Size = UDim2.new(1, 0, 0, 30)
+    titleBar.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    titleBar.Parent = mainFrame
+
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Size = UDim2.new(1, -70, 1, 0)
+    titleLabel.Position = UDim2.new(0, 10, 0, 0)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Text = "[ KR ] Narlum Hub"
+    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleLabel.Font = Enum.Font.SourceSansBold
+    titleLabel.TextSize = 18
+    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    titleLabel.Parent = titleBar
+
+    -- 디스코드 버튼 생성
+    local discordButton = Instance.new("ImageButton")
+    discordButton.Size = UDim2.new(0, 30, 0, 30)
+    discordButton.Position = UDim2.new(1, -60, 0, 0)
+    discordButton.BackgroundTransparency = 1
+    discordButton.Image = "rbxassetid://11417942820"
+    discordButton.Parent = titleBar
+
+    discordButton.MouseButton1Click:Connect(function()
+        local url = "https://discord.gg/H88xeCUXKU"
+        game:GetService("GuiService"):OpenBrowserWindow(url)
+    end)
+
+    -- 닫기 버튼 생성
+    local closeButton = Instance.new("TextButton")
+    closeButton.Size = UDim2.new(0, 30, 0, 30)
+    closeButton.Position = UDim2.new(1, -30, 0, 0)
+    closeButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+    closeButton.Text = "X"
+    closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    closeButton.Font = Enum.Font.SourceSansBold
+    closeButton.TextSize = 18
+    closeButton.Parent = titleBar
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = closeButton
+
+    -- 상단 버튼 생성
+    local function createTopButton(text, position, callback)
+        local button = Instance.new("TextButton")
+        button.Size = UDim2.new(0, 150, 0, 30)
+        button.Position = position
+        button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+        button.Text = text
+        button.TextColor3 = Color3.fromRGB(255, 255, 255)
+        button.Font = Enum.Font.SourceSans
+        button.TextSize = 14
+        button.Parent = mainFrame
+
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(0, 8)
+        corner.Parent = button
+
+        button.MouseButton1Click:Connect(callback)
+    end
+
+    -- 콘텐츠 프레임 생성
+    local function createContentFrame(name)
+        local frame = Instance.new("Frame")
+        frame.Name = name
+        frame.Size = UDim2.new(0.65, -20, 1, -90)
+        frame.Position = UDim2.new(0.35, 10, 0, 80)
+        frame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+        frame.BorderSizePixel = 0
+        frame.Parent = mainFrame
+
+        local titleLabel = Instance.new("TextLabel")
+        titleLabel.Size = UDim2.new(1, 0, 0, 30)
+        titleLabel.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+        titleLabel.Text = name
+        titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        titleLabel.Font = Enum.Font.SourceSansBold
+        titleLabel.TextSize = 16
+        titleLabel.Parent = frame
+
+        return frame
+    end
+
+    -- 버튼 생성
+    createTopButton("게임", UDim2.new(0, 10, 0, 50), function()
+        local contentFrame = createContentFrame("게임")
+        contentFrame.Visible = not contentFrame.Visible
+    end)
+
+    createTopButton("스크립트", UDim2.new(0, 170, 0, 50), function()
+        local contentFrame = createContentFrame("스크립트")
+        contentFrame.Visible = not contentFrame.Visible
+    end)
+
+    createTopButton("설정", UDim2.new(0, 330, 0, 50), function()
+        local contentFrame = createContentFrame("설정")
+        contentFrame.Visible = not contentFrame.Visible
+    end)
+
+    createTopButton("기타", UDim2.new(0, 490, 0, 50), function()
+        local contentFrame = createContentFrame("기타")
+        contentFrame.Visible = not contentFrame.Visible
+    end)
+
+    closeButton.MouseButton1Click:Connect(function()
+        screenGui:Destroy()
+    end)
+end
+
+-- 초기화 함수 호출
+createInputFrame()
