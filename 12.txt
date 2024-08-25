@@ -1,0 +1,180 @@
+local player = game.Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+local UIS = game:GetService("UserInputService")
+
+-- 드래그 가능한 창 생성 함수
+local function makeDraggable(frame)
+    local dragging
+    local dragInput
+    local dragStart
+    local startPos
+
+    local function updateInput(input)
+        if dragging then
+            local delta = input.Position - dragStart
+            frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end
+
+    frame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = frame.Position
+            input.InputChanged:Connect(updateInput)
+        end
+    end)
+
+    frame.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+end
+
+-- 닫기 버튼 추가 함수
+local function addCloseButton(frame, callback)
+    local closeButton = Instance.new("TextButton")
+    closeButton.Size = UDim2.new(0.1, 0, 0.1, 0)
+    closeButton.Position = UDim2.new(1, -50, 0, 10)
+    closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    closeButton.BorderSizePixel = 0
+    closeButton.Text = "X"
+    closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    closeButton.Font = Enum.Font.SourceSansBold
+    closeButton.TextSize = 24
+    closeButton.Parent = frame
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 12)
+    corner.Parent = closeButton
+
+    closeButton.MouseButton1Click:Connect(callback)
+end
+
+-- 비밀번호 입력창 생성 함수
+local function createInputFrame()
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "InputGui"
+    screenGui.Parent = playerGui
+
+    local inputFrame = Instance.new("Frame")
+    inputFrame.Size = UDim2.new(0.4, 0, 0.3, 0)
+    inputFrame.Position = UDim2.new(0.3, 0, 0.35, 0)
+    inputFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    inputFrame.BorderSizePixel = 0
+    inputFrame.Parent = screenGui
+
+    -- 곡선 추가
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 12)
+    corner.Parent = inputFrame
+
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Size = UDim2.new(1, 0, 0.2, 0)
+    titleLabel.Position = UDim2.new(0, 0, 0, 0)
+    titleLabel.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    titleLabel.Text = "비밀번호 입력"
+    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleLabel.Font = Enum.Font.SourceSans
+    titleLabel.TextSize = 20
+    titleLabel.Parent = inputFrame
+
+    local passwordBox = Instance.new("TextBox")
+    passwordBox.Size = UDim2.new(0.9, 0, 0.2, 0)
+    passwordBox.Position = UDim2.new(0.05, 0, 0.25, 0)
+    passwordBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    passwordBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    passwordBox.Font = Enum.Font.SourceSans
+    passwordBox.TextSize = 18
+    passwordBox.ClearTextOnFocus = false
+    passwordBox.Text = ""
+    passwordBox.Parent = inputFrame
+
+    local submitButton = Instance.new("TextButton")
+    submitButton.Size = UDim2.new(0.9, 0, 0.2, 0)
+    submitButton.Position = UDim2.new(0.05, 0, 0.5, 0)
+    submitButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+    submitButton.Text = "확인"
+    submitButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    submitButton.Font = Enum.Font.SourceSans
+    submitButton.TextSize = 18
+    submitButton.Parent = inputFrame
+
+    -- 비밀번호 입력 성공 시 메인 창 표시
+    local function showMainWindow()
+        -- 3초 후 비밀번호 입력창 제거 및 메인 창 생성
+        wait(3)
+        inputFrame:Destroy()
+        createMainWindow()
+    end
+
+    local function handleSubmit()
+        if passwordBox.Text == "1234" then
+            -- 비밀번호 입력 성공 시 메인 창 표시
+            showMainWindow()
+        else
+            -- 입력 오류 메시지 표시
+            local errorLabel = Instance.new("TextLabel")
+            errorLabel.Size = UDim2.new(1, 0, 0.2, 0)
+            errorLabel.Position = UDim2.new(0, 0, 0.75, 0)
+            errorLabel.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+            errorLabel.Text = "비밀번호가 올바르지 않습니다."
+            errorLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            errorLabel.Font = Enum.Font.SourceSans
+            errorLabel.TextSize = 18
+            errorLabel.Parent = inputFrame
+        end
+    end
+
+    submitButton.MouseButton1Click:Connect(handleSubmit)
+
+    -- 비밀번호 입력창 드래그 가능
+    makeDraggable(inputFrame)
+
+    -- 닫기 버튼 추가
+    addCloseButton(inputFrame, function()
+        inputFrame:Destroy()
+    end)
+end
+
+-- 메인 창 생성 함수
+local function createMainWindow()
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "MainGui"
+    screenGui.Parent = playerGui
+
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(0.5, 0, 0.5, 0)
+    mainFrame.Position = UDim2.new(0.25, 0, 0.25, 0)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255) -- 흰색 배경
+    mainFrame.BorderSizePixel = 0
+    mainFrame.Parent = screenGui
+
+    -- 곡선 추가
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 12)
+    corner.Parent = mainFrame
+
+    -- 닫기 버튼 추가
+    addCloseButton(mainFrame, function()
+        mainFrame:Destroy()
+    end)
+
+    -- 안녕 메시지 추가
+    local messageLabel = Instance.new("TextLabel")
+    messageLabel.Size = UDim2.new(1, 0, 1, 0)
+    messageLabel.Position = UDim2.new(0, 0, 0, 0)
+    messageLabel.BackgroundTransparency = 1
+    messageLabel.Text = "안녕"
+    messageLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
+    messageLabel.Font = Enum.Font.SourceSansBold
+    messageLabel.TextSize = 40
+    messageLabel.TextWrapped = true
+    messageLabel.TextXAlignment = Enum.TextXAlignment.Center
+    messageLabel.TextYAlignment = Enum.TextYAlignment.Center
+    messageLabel.Parent = mainFrame
+end
+
+-- 비밀번호 입력창 생성
+createInputFrame()
