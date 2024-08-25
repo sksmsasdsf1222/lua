@@ -1,0 +1,374 @@
+local player = game.Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+-- 입력 확인 창 생성 함수
+local function createInputFrame()
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "InputGui"
+    screenGui.Parent = playerGui
+
+    local inputFrame = Instance.new("Frame")
+    inputFrame.Size = UDim2.new(0.4, 0, 0.3, 0)
+    inputFrame.Position = UDim2.new(0.3, 0, 0.35, 0)
+    inputFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    inputFrame.BorderSizePixel = 0
+    inputFrame.Parent = screenGui
+
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Size = UDim2.new(1, 0, 0.2, 0)
+    titleLabel.Position = UDim2.new(0, 0, 0, 0)
+    titleLabel.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    titleLabel.Text = "비밀번호 입력"
+    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleLabel.Font = Enum.Font.SourceSans
+    titleLabel.TextSize = 20
+    titleLabel.Parent = inputFrame
+
+    local passwordBox = Instance.new("TextBox")
+    passwordBox.Size = UDim2.new(0.9, 0, 0.2, 0)
+    passwordBox.Position = UDim2.new(0.05, 0, 0.25, 0)
+    passwordBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    passwordBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    passwordBox.Font = Enum.Font.SourceSans
+    passwordBox.TextSize = 18
+    passwordBox.ClearTextOnFocus = false
+    passwordBox.Text = ""
+    passwordBox.TextTransparency = 0.5 -- Make text hidden to show it's a password
+    passwordBox.TextStrokeTransparency = 0.5
+    passwordBox.Parent = inputFrame
+
+    local submitButton = Instance.new("TextButton")
+    submitButton.Size = UDim2.new(0.9, 0, 0.2, 0)
+    submitButton.Position = UDim2.new(0.05, 0, 0.5, 0)
+    submitButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+    submitButton.Text = "확인"
+    submitButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    submitButton.Font = Enum.Font.SourceSans
+    submitButton.TextSize = 18
+    submitButton.Parent = inputFrame
+
+    local function handleSubmit()
+        if passwordBox.Text == "1234" then
+            -- 입력 확인 창 제거
+            screenGui:Destroy()
+            -- 메인 UI 생성
+            createMainUI()
+        else
+            -- 입력 오류 메시지 표시
+            local errorLabel = Instance.new("TextLabel")
+            errorLabel.Size = UDim2.new(1, 0, 0.2, 0)
+            errorLabel.Position = UDim2.new(0, 0, 0.75, 0)
+            errorLabel.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+            errorLabel.Text = "비밀번호가 올바르지 않습니다."
+            errorLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            errorLabel.Font = Enum.Font.SourceSans
+            errorLabel.TextSize = 18
+            errorLabel.Parent = inputFrame
+        end
+    end
+
+    submitButton.MouseButton1Click:Connect(handleSubmit)
+end
+
+-- 메인 프레임 생성 함수
+local function createMainFrame()
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0.6, 0, 0.6, 0)
+    frame.Position = UDim2.new(0.2, 0, 0.2, 0)
+    frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    frame.BorderSizePixel = 0
+    frame.Active = true
+    frame.Draggable = true
+    frame.Parent = playerGui:FindFirstChildOfClass("ScreenGui")
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 10)
+    corner.Parent = frame
+
+    return frame
+end
+
+-- 상단 타이틀바 및 닫기 버튼 생성
+local function createTitleBar(frame)
+    local titleBar = Instance.new("Frame")
+    titleBar.Size = UDim2.new(1, 0, 0, 30)
+    titleBar.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    titleBar.Parent = frame
+
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Size = UDim2.new(1, -70, 1, 0)
+    titleLabel.Position = UDim2.new(0, 10, 0, 0)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Text = "[ KR ] Narlum Hub"
+    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleLabel.Font = Enum.Font.SourceSansBold
+    titleLabel.TextSize = 18
+    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    titleLabel.Parent = titleBar
+
+    -- 디스코드 버튼 생성
+    local discordButton = Instance.new("ImageButton")
+    discordButton.Size = UDim2.new(0, 30, 0, 30)
+    discordButton.Position = UDim2.new(1, -60, 0, 0)
+    discordButton.BackgroundTransparency = 1
+    discordButton.Image = "rbxassetid://11417942820"
+    discordButton.Parent = titleBar
+
+    discordButton.MouseButton1Click:Connect(function()
+        local url = "https://discord.gg/H88xeCUXKU"
+        game:GetService("GuiService"):OpenBrowserWindow(url)
+    end)
+
+    -- 닫기 버튼 생성
+    local closeButton = Instance.new("TextButton")
+    closeButton.Size = UDim2.new(0, 30, 0, 30)
+    closeButton.Position = UDim2.new(1, -30, 0, 0)
+    closeButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+    closeButton.Text = "X"
+    closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    closeButton.Font = Enum.Font.SourceSansBold
+    closeButton.TextSize = 18
+    closeButton.Parent = titleBar
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = closeButton
+
+    return titleBar, closeButton
+end
+
+-- 상단 버튼 생성
+local function createTopButton(text, position, callback, parentFrame)
+    local button = Instance.new("TextButton")
+    button.Size = UDim2.new(0, 150, 0, 30)
+    button.Position = position
+    button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    button.Text = text
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.Font = Enum.Font.SourceSans
+    button.TextSize = 14
+    button.Parent = parentFrame
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = button
+
+    button.MouseButton1Click:Connect(callback)
+end
+
+-- 콘텐츠 프레임 생성
+local function createContentFrame(name, parentFrame)
+    local frame = Instance.new("Frame")
+    frame.Name = name
+    frame.Size = UDim2.new(0.65, -20, 1, -90)
+    frame.Position = UDim2.new(0.35, 10, 0, 80)
+    frame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    frame.BorderSizePixel = 0
+    frame.Visible = false
+    frame.Parent = parentFrame
+
+    return frame
+end
+
+-- 스크롤 가능 프레임 생성
+local function createScrollingFrame(parentFrame)
+    local scrollingFrame = Instance.new("ScrollingFrame")
+    scrollingFrame.Size = UDim2.new(0.35, -10, 1, -40)
+    scrollingFrame.Position = UDim2.new(0, 10, 0, 40)
+    scrollingFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    scrollingFrame.BorderSizePixel = 0
+    scrollingFrame.CanvasSize = UDim2.new(0, 0, 1, 0)
+    scrollingFrame.ScrollBarThickness = 6
+    scrollingFrame.Parent = parentFrame
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 10)
+    corner.Parent = scrollingFrame
+
+    return scrollingFrame
+end
+
+-- 메인 UI 생성
+local function createMainUI()
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "MainGui"
+    screenGui.Parent = playerGui
+
+    local mainFrame = createMainFrame()
+    local titleBar, closeButton = createTitleBar(mainFrame)
+    local scrollingFrame = createScrollingFrame(mainFrame)
+
+    -- 콘텐츠 프레임 생성
+    local frames = {
+        basicFeaturesFrame = createContentFrame("BasicFeaturesFrame", mainFrame),
+        pangBudaeFrame = createContentFrame("PangBudaeFrame", mainFrame),
+        babbabFrame = createContentFrame("BabbabFrame", mainFrame),
+        tabbyBudaeFrame = createContentFrame("TabbyBudaeFrame", mainFrame),
+        sharkBudaeFrame = createContentFrame("SharkBudaeFrame", mainFrame),
+        prisonLifeFrame = createContentFrame("PrisonLifeFrame", mainFrame),
+        astralFrame = createContentFrame("AstralFrame", mainFrame),
+        scriptCollectionFrame = createContentFrame("ScriptCollectionFrame", mainFrame)
+    }
+
+    -- 상단 버튼 및 이벤트 핸들러 설정
+    local function toggleContentFrame(frameName)
+        for _, frame in pairs(frames) do
+            frame.Visible = frame.Name == frameName
+        end
+    end
+
+    -- 기본 기능 구현
+    local function createBasicFeaturesFrame()
+        local function createToggleButton(name, position, initialState, callback)
+            local button = Instance.new("TextButton")
+            button.Size = UDim2.new(0, 120, 0, 30)
+            button.Position = position
+            button.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+            button.Text = name .. " (" .. (initialState and "ON" or "OFF") .. ")"
+            button.TextColor3 = Color3.fromRGB(255, 255, 255)
+            button.Parent = frames.basicFeaturesFrame
+
+            local corner = Instance.new("UICorner")
+            corner.CornerRadius = UDim.new(0, 8)
+            corner.Parent = button
+
+            button.MouseButton1Click:Connect(callback)
+            return button
+        end
+
+        -- 투명인간 버튼
+        local isInvisible = false
+        local toggleButton1 = createToggleButton("투명인간", UDim2.new(0, 10, 0, 40), isInvisible, function()
+            isInvisible = not isInvisible
+            local character = player.Character
+            if character then
+                local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+                if humanoidRootPart then
+                    humanoidRootPart.Transparency = isInvisible and 0.5 or 0
+                    for _, part in ipairs(character:GetChildren()) do
+                        if part:IsA("BasePart") then
+                            part.Transparency = isInvisible and 0.5 or 0
+                        end
+                    end
+                end
+            end
+            toggleButton1.Text = "투명인간 (" .. (isInvisible and "ON" or "OFF") .. ")"
+        end)
+
+        -- 하늘 날기 버튼
+        local isFlying = false
+        local function updateFlying()
+            while isFlying do
+                local cameraCFrame = workspace.CurrentCamera.CFrame
+                local character = player.Character
+                local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+                if humanoidRootPart then
+                    humanoidRootPart.Velocity = (cameraCFrame.LookVector * 50) + Vector3.new(0, 20, 0)
+                end
+                RunService.RenderStepped:wait()
+            end
+        end
+
+        local toggleButton2 = createToggleButton("하늘 날기", UDim2.new(0, 10, 0, 80), isFlying, function()
+            isFlying = not isFlying
+            if isFlying then
+                local bodyVelocity = Instance.new("BodyVelocity", player.Character:FindFirstChild("HumanoidRootPart"))
+                bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+                bodyVelocity.MaxForce = Vector3.new(4000, 4000, 4000)
+
+                local bodyGyro = Instance.new("BodyGyro", player.Character:FindFirstChild("HumanoidRootPart"))
+                bodyGyro.CFrame = workspace.CurrentCamera.CFrame
+                bodyGyro.MaxTorque = Vector3.new(4000, 4000, 4000)
+                bodyGyro.P = 3000
+
+                updateFlying()
+            else
+                for _, child in ipairs(player.Character:FindFirstChild("HumanoidRootPart"):GetChildren()) do
+                    if child:IsA("BodyVelocity") or child:IsA("BodyGyro") then
+                        child:Destroy()
+                    end
+                end
+            end
+            toggleButton2.Text = "하늘 날기 (" .. (isFlying and "ON" or "OFF") .. ")"
+        end)
+
+        -- 벽뚫기 버튼
+        local isWallClimbing = false
+        local toggleButton3 = createToggleButton("벽뚫기", UDim2.new(0, 10, 0, 120), isWallClimbing, function()
+            isWallClimbing = not isWallClimbing
+            local character = player.Character
+            if character then
+                local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+                if humanoidRootPart then
+                    humanoidRootPart.CanCollide = not isWallClimbing
+                end
+            end
+            toggleButton3.Text = "벽뚫기 (" .. (isWallClimbing and "ON" or "OFF") .. ")"
+        end)
+    end
+
+    createBasicFeaturesFrame()
+
+    -- 상단 버튼 클릭 이벤트 설정
+    createTopButton("기본 기능", UDim2.new(0, 10, 0, 50), function()
+        toggleContentFrame("basicFeaturesFrame")
+    end, scrollingFrame)
+
+    -- 나머지 버튼 클릭 이벤트 설정
+    createTopButton("팡부대", UDim2.new(0, 10, 0, 90), function()
+        toggleContentFrame("pangBudaeFrame")
+    end, scrollingFrame)
+
+    createTopButton("빱빱", UDim2.new(0, 10, 0, 130), function()
+        toggleContentFrame("babbabFrame")
+    end, scrollingFrame)
+
+    createTopButton("탭비부대", UDim2.new(0, 10, 0, 170), function()
+        toggleContentFrame("tabbyBudaeFrame")
+    end, scrollingFrame)
+
+    createTopButton("샤크부대", UDim2.new(0, 10, 0, 210), function()
+        toggleContentFrame("sharkBudaeFrame")
+    end, scrollingFrame)
+
+    createTopButton("프리즌 라이프", UDim2.new(0, 10, 0, 250), function()
+        toggleContentFrame("prisonLifeFrame")
+    end, scrollingFrame)
+
+    createTopButton("아스트랄", UDim2.new(0, 10, 0, 290), function()
+        toggleContentFrame("astralFrame")
+    end, scrollingFrame)
+
+    createTopButton("스크립트 콜렉션", UDim2.new(0, 10, 0, 330), function()
+        toggleContentFrame("scriptCollectionFrame")
+    end, scrollingFrame)
+
+    -- 창 최소화 및 복원 기능
+    local minimized = false
+    closeButton.MouseButton1Click:Connect(function()
+        if minimized then
+            mainFrame.Visible = true
+            mainFrame:TweenSize(UDim2.new(0.6, 0, 0.6, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.5, true)
+            minimized = false
+        else
+            mainFrame:TweenSize(UDim2.new(0.3, 0, 0.1, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.5, true)
+            mainFrame.Visible = false
+            minimized = true
+        end
+    end)
+
+    -- 마우스 이동 시 창 위치 업데이트
+    local function update(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement then
+            local mousePos = UIS:GetMouseLocation()
+            mainFrame.Position = UDim2.new(0, mousePos.X - mainFrame.Size.X.Offset / 2, 0, mousePos.Y - mainFrame.Size.Y.Offset / 2)
+        end
+    end
+
+    UIS.InputChanged:Connect(update)
+end
+
+-- 입력 확인 창 호출
+createInputFrame()
