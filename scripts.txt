@@ -1,0 +1,334 @@
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+-- 곡선 모서리 적용 함수
+local function setRoundedCorners(instance, radius)
+    instance.ClipsDescendants = true
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, radius)
+    corner.Parent = instance
+end
+
+-- X 버튼 생성 함수
+local function createCloseButton(parent)
+    local closeButton = Instance.new("TextButton")
+    closeButton.Size = UDim2.new(0, 30, 0, 30)
+    closeButton.Position = UDim2.new(1, -40, 0, 10)
+    closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    closeButton.BorderSizePixel = 0
+    closeButton.Text = "✕"
+    closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    closeButton.Font = Enum.Font.GothamBold
+    closeButton.TextSize = 18
+    closeButton.TextStrokeTransparency = 0.8
+    closeButton.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    setRoundedCorners(closeButton, 10)
+    closeButton.Parent = parent
+
+    closeButton.MouseButton1Click:Connect(function()
+        parent:TweenSizeAndPosition(
+            UDim2.new(0, 0, 0, 0),
+            UDim2.new(0.5, 0, 0.5, 0),
+            Enum.EasingDirection.In,
+            Enum.EasingStyle.Sine,
+            0.5,
+            true,
+            function() parent:Destroy() end
+        )
+    end)
+    
+    return closeButton
+end
+
+-- 비밀번호 입력창 생성
+local function createPasswordScreen()
+    local passwordScreen = Instance.new("ScreenGui")
+    passwordScreen.Name = "PasswordScreen"
+    passwordScreen.Parent = playerGui
+
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(0, 0, 0, 0)
+    mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+    mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    mainFrame.BorderSizePixel = 0
+    setRoundedCorners(mainFrame, 20)
+    mainFrame.Parent = passwordScreen
+
+    -- 애니메이션으로 창 확장
+    local tween = TweenService:Create(mainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out), {Size = UDim2.new(0.5, 0, 0.5, 0)})
+    tween:Play()
+
+    createCloseButton(mainFrame)
+
+    local titleFrame = Instance.new("Frame")
+    titleFrame.Size = UDim2.new(1, 0, 0, 50)
+    titleFrame.BackgroundColor3 = Color3.fromRGB(65, 65, 65)
+    titleFrame.BorderSizePixel = 0
+    setRoundedCorners(titleFrame, 20)
+    titleFrame.Parent = mainFrame
+
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Size = UDim2.new(1, 0, 1, 0)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Text = "[ KR ] Verification Hub"
+    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleLabel.Font = Enum.Font.GothamBold
+    titleLabel.TextSize = 20  -- 제목 크기 줄이기
+    titleLabel.TextStrokeTransparency = 0.8
+    titleLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    titleLabel.Parent = titleFrame
+
+    local passwordBox = Instance.new("TextBox")
+    passwordBox.Size = UDim2.new(0.8, 0, 0, 50)
+    passwordBox.Position = UDim2.new(0.5, 0, 0.45, 0)
+    passwordBox.AnchorPoint = Vector2.new(0.5, 0.5)
+    passwordBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    passwordBox.BorderSizePixel = 0
+    passwordBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    passwordBox.Font = Enum.Font.Gotham
+    passwordBox.TextSize = 18
+    passwordBox.Text = ""
+    passwordBox.ClearTextOnFocus = false
+    passwordBox.TextTransparency = 0.5
+    setRoundedCorners(passwordBox, 10)
+    passwordBox.Parent = mainFrame
+
+    local submitButton = Instance.new("TextButton")
+    submitButton.Size = UDim2.new(0.4, 0, 0, 45)
+    submitButton.Position = UDim2.new(0.5, 0, 0.8, 0)
+    submitButton.AnchorPoint = Vector2.new(0.5, 0.5)
+    submitButton.BackgroundColor3 = Color3.fromRGB(65, 65, 65)
+    submitButton.BorderSizePixel = 2
+    submitButton.BorderColor3 = Color3.fromRGB(255, 255, 255)
+    submitButton.Text = "완료"
+    submitButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    submitButton.Font = Enum.Font.GothamBold
+    submitButton.TextSize = 20
+    submitButton.TextStrokeTransparency = 0.8
+    submitButton.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    setRoundedCorners(submitButton, 10)
+    submitButton.Parent = mainFrame
+
+    return passwordScreen, passwordBox, submitButton, mainFrame
+end
+
+-- 비밀번호 틀렸을 때 알림창 생성 함수
+local function createErrorNotification(parentFrame)
+    local errorNotification = Instance.new("Frame")
+    errorNotification.Size = UDim2.new(0, 0, 0, 0)
+    errorNotification.Position = UDim2.new(0.5, 0, 0, -50)
+    errorNotification.AnchorPoint = Vector2.new(0.5, 0)
+    errorNotification.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    errorNotification.BorderSizePixel = 0
+    setRoundedCorners(errorNotification, 20)
+    errorNotification.Parent = parentFrame
+
+    local contentLabel = Instance.new("TextLabel")
+    contentLabel.Size = UDim2.new(1, 0, 1, 0)
+    contentLabel.BackgroundTransparency = 1
+    contentLabel.Text = "비밀번호를 틀렸습니다."
+    contentLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    contentLabel.Font = Enum.Font.Gotham
+    contentLabel.TextSize = 18
+    contentLabel.TextStrokeTransparency = 0.8
+    contentLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    contentLabel.Parent = errorNotification
+
+    local expandTween = TweenService:Create(errorNotification, TweenInfo.new(0.5, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out), {Size = UDim2.new(0.8, 0, 0.1, 0)})
+    expandTween:Play()
+
+    delay(1.5, function()
+        local shrinkTween = TweenService:Create(errorNotification, TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)})
+        shrinkTween:Play()
+        shrinkTween.Completed:Connect(function() errorNotification:Destroy() end)
+    end)
+end
+
+-- 중요 시스템 GUI 생성 함수
+local function createImportantSystemGui()
+    local systemGui = Instance.new("ScreenGui")
+    systemGui.Name = "ImportantSystemGui"
+    systemGui.Parent = playerGui
+
+    local systemFrame = Instance.new("Frame")
+    systemFrame.Size = UDim2.new(0.85, 0, 0.85, 0)
+    systemFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+    systemFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+    systemFrame.BackgroundColor3 = Color3.fromRGB(240, 240, 240)
+    systemFrame.BorderSizePixel = 0
+    setRoundedCorners(systemFrame, 20)
+    systemFrame.Parent = systemGui
+
+    createCloseButton(systemFrame)
+
+    local titleFrame = Instance.new("Frame")
+    titleFrame.Size = UDim2.new(1, 0, 0, 50)
+    titleFrame.BackgroundColor3 = Color3.fromRGB(65, 65, 65)
+    titleFrame.BorderSizePixel = 0
+    setRoundedCorners(titleFrame, 20)
+    titleFrame.Parent = systemFrame
+
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Size = UDim2.new(1, 0, 1, 0)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Text = "기본 기능"
+    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleLabel.Font = Enum.Font.GothamBold
+    titleLabel.TextSize = 20
+    titleLabel.TextStrokeTransparency = 0.8
+    titleLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    titleLabel.Parent = titleFrame
+
+    local scrollFrame = Instance.new("ScrollingFrame")
+    scrollFrame.Size = UDim2.new(1, -20, 1, -70)
+    scrollFrame.Position = UDim2.new(0, 10, 0, 60)
+    scrollFrame.BackgroundTransparency = 1
+    scrollFrame.BorderSizePixel = 0
+    scrollFrame.CanvasSize = UDim2.new(0, 0, 2, 0)
+    scrollFrame.ScrollBarThickness = 10
+    scrollFrame.Parent = systemFrame
+
+    local layout = Instance.new("UIListLayout")
+    layout.Parent = scrollFrame
+
+    -- 날기 기능 버튼
+    local flyButton = Instance.new("TextButton")
+    flyButton.Size = UDim2.new(0.8, 0, 0, 50)
+    flyButton.Position = UDim2.new(0.5, 0, 0, 10)
+    flyButton.AnchorPoint = Vector2.new(0.5, 0)
+    flyButton.BackgroundColor3 = Color3.fromRGB(65, 65, 65)
+    flyButton.BorderSizePixel = 2
+    flyButton.BorderColor3 = Color3.fromRGB(255, 255, 255)
+    flyButton.Text = "날기 (Fly)"
+    flyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    flyButton.Font = Enum.Font.GothamBold
+    flyButton.TextSize = 20
+    flyButton.TextStrokeTransparency = 0.8
+    flyButton.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    setRoundedCorners(flyButton, 10)
+    flyButton.Parent = scrollFrame
+
+    -- ESP 버튼
+    local espButton = Instance.new("TextButton")
+    espButton.Size = UDim2.new(0.8, 0, 0, 50)
+    espButton.Position = UDim2.new(0.5, 0, 0, 70)
+    espButton.AnchorPoint = Vector2.new(0.5, 0)
+    espButton.BackgroundColor3 = Color3.fromRGB(65, 65, 65)
+    espButton.BorderSizePixel = 2
+    espButton.BorderColor3 = Color3.fromRGB(255, 255, 255)
+    espButton.Text = "ESP (All Players)"
+    espButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    espButton.Font = Enum.Font.GothamBold
+    espButton.TextSize = 20
+    espButton.TextStrokeTransparency = 0.8
+    espButton.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    setRoundedCorners(espButton, 10)
+    espButton.Parent = scrollFrame
+
+    -- 날기 기능 활성화
+    local function toggleFly()
+        local char = player.Character
+        if not char then return end
+        local humanoid = char:FindFirstChildOfClass("Humanoid")
+        if not humanoid then return end
+
+        if not char:FindFirstChild("Fly") then
+            local flyScript = Instance.new("LocalScript")
+            flyScript.Name = "Fly"
+            flyScript.Source = [[
+                local player = game.Players.LocalPlayer
+                local mouse = player:GetMouse()
+                local char = player.Character
+                local flying = false
+
+                local function fly()
+                    flying = true
+                    while flying do
+                        local direction = (mouse.Hit.p - char.PrimaryPart.Position).unit
+                        char.PrimaryPart.Velocity = direction * 50
+                        wait(0.1)
+                    end
+                end
+
+                mouse.KeyDown:Connect(function(key)
+                    if key == "space" then
+                        if flying then
+                            flying = false
+                            char.PrimaryPart.Velocity = Vector3.new(0, 0, 0)
+                        else
+                            fly()
+                        end
+                    end
+                end)
+            ]]
+            flyScript.Parent = char
+        else
+            char:FindFirstChild("Fly"):Destroy()
+        end
+    end
+
+    -- ESP 기능 활성화
+    local function toggleESP()
+        local function createESP(player)
+            local espPart = Instance.new("Part")
+            espPart.Size = Vector3.new(4, 1, 4)
+            espPart.Anchored = true
+            espPart.CanCollide = false
+            espPart.BrickColor = BrickColor.new("Bright red")
+            espPart.Material = Enum.Material.SmoothPlastic
+            espPart.Transparency = 0.5
+            espPart.Parent = player.Character
+            espPart.CFrame = player.Character.HumanoidRootPart.CFrame + Vector3.new(0, 5, 0)
+
+            local nameTag = Instance.new("BillboardGui")
+            nameTag.Size = UDim2.new(0, 200, 0, 50)
+            nameTag.Adornee = espPart
+            nameTag.Parent = espPart
+
+            local label = Instance.new("TextLabel")
+            label.Size = UDim2.new(1, 0, 1, 0)
+            label.BackgroundTransparency = 1
+            label.Text = player.Name
+            label.TextColor3 = Color3.fromRGB(255, 255, 255)
+            label.TextStrokeTransparency = 0.8
+            label.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+            label.Font = Enum.Font.GothamBold
+            label.TextSize = 20
+            label.Parent = nameTag
+        end
+
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p ~= player then
+                if not p.Character:FindFirstChild("ESP") then
+                    createESP(p)
+                end
+            end
+        end
+    end
+
+    -- 버튼 클릭 시 이벤트 처리
+    flyButton.MouseButton1Click:Connect(toggleFly)
+    espButton.MouseButton1Click:Connect(toggleESP)
+end
+
+-- 프로그램 실행
+local function start()
+    local passwordScreen, passwordBox, submitButton, mainFrame = createPasswordScreen()
+    
+    submitButton.MouseButton1Click:Connect(function()
+        local correctPassword = "1234"  -- 예제 비밀번호
+        if passwordBox.Text == correctPassword then
+            passwordScreen:Destroy()
+            createImportantSystemGui()
+        else
+            createErrorNotification(mainFrame)
+        end
+    end)
+end
+
+start()
