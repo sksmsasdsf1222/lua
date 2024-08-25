@@ -1,0 +1,107 @@
+-- 로블록스 서비스 가져오기
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+local TweenService = game:GetService("TweenService")
+
+-- 기본 크기 설정
+local originalSize = UDim2.new(0, 500, 0, 300)
+local minimizedSize = UDim2.new(0, 250, 0, 50)
+
+-- 메인 프레임 생성
+local function createMainFrame()
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "HighQualityGui"
+    screenGui.Parent = playerGui
+
+    local frame = Instance.new("Frame")
+    frame.Size = originalSize
+    frame.Position = UDim2.new(0.5, -250, 0.45, -150) -- Y 위치를 0.45로 수정하여 위로 올림
+    frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    frame.BorderSizePixel = 0
+    frame.Active = true
+    frame.Draggable = true
+    frame.Parent = screenGui
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 10)
+    corner.Parent = frame
+
+    return frame, screenGui
+end
+
+-- 상단 타이틀바 및 닫기 버튼 생성
+local function createTitleBar(frame)
+    local titleBar = Instance.new("Frame")
+    titleBar.Size = UDim2.new(1, 0, 0, 30)
+    titleBar.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    titleBar.Parent = frame
+
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Size = UDim2.new(1, -70, 1, 0) -- 1, -70로 수정하여 디스코드 아이콘 공간 확보
+    titleLabel.Position = UDim2.new(0, 10, 0, 0)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Text = "[ KR ] Narlum Hub"
+    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleLabel.Font = Enum.Font.SourceSansBold
+    titleLabel.TextSize = 18
+    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    titleLabel.Parent = titleBar
+
+    local closeButton = Instance.new("TextButton")
+    closeButton.Size = UDim2.new(0, 30, 1, 0)
+    closeButton.Position = UDim2.new(1, -40, 0, 0)
+    closeButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+    closeButton.Text = "X"
+    closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    closeButton.Font = Enum.Font.SourceSansBold
+    closeButton.TextSize = 18
+    closeButton.Parent = titleBar
+
+    local cornerButton = Instance.new("UICorner")
+    cornerButton.CornerRadius = UDim.new(0, 8)
+    cornerButton.Parent = closeButton
+
+    -- 닫기 버튼 클릭 시 GUI 숨기기
+    closeButton.MouseButton1Click:Connect(function()
+        frame.Parent:Destroy()
+    end)
+end
+
+-- 키 입력 창 생성
+local function createInputSection(frame)
+    local inputPrompt = Instance.new("TextBox")
+    inputPrompt.Size = UDim2.new(0.8, 0, 0, 50)
+    inputPrompt.Position = UDim2.new(0.1, 0, 0.3, 0)
+    inputPrompt.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    inputPrompt.TextColor3 = Color3.fromRGB(0, 0, 0)
+    inputPrompt.Font = Enum.Font.SourceSans
+    inputPrompt.TextSize = 22
+    inputPrompt.PlaceholderText = "키를 입력하세요..."
+    inputPrompt.Parent = frame
+
+    local completeButton = Instance.new("TextButton")
+    completeButton.Size = UDim2.new(0.8, 0, 0, 40)
+    completeButton.Position = UDim2.new(0.1, 0, 0.75, 0)
+    completeButton.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
+    completeButton.Text = "완료"
+    completeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    completeButton.Font = Enum.Font.SourceSansBold
+    completeButton.TextSize = 20
+    completeButton.Parent = frame
+
+    local cornerComplete = Instance.new("UICorner")
+    cornerComplete.CornerRadius = UDim.new(0, 10)
+    cornerComplete.Parent = completeButton
+
+    -- 완료 버튼 클릭 시 입력 처리
+    completeButton.MouseButton1Click:Connect(function()
+        print("입력된 키: " .. inputPrompt.Text)
+        frame.Parent:Destroy()  -- 완료 후 GUI 제거
+    end)
+end
+
+-- GUI 생성 함수 호출
+local frame, screenGui = createMainFrame()
+createTitleBar(frame)
+createInputSection(frame)
