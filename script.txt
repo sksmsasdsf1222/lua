@@ -5,14 +5,14 @@ local playerGui = player:WaitForChild("PlayerGui")
 local UIS = game:GetService("UserInputService")
 
 -- 기본 크기 설정
-local originalSize = UDim2.new(0, 500, 0, 300)
+local originalSize = UDim2.new(0, 700, 0, 400)
 local minimizedSize = UDim2.new(0, 250, 0, 50)
 
 -- 메인 프레임 생성
 local function createMainFrame()
     local frame = Instance.new("Frame")
     frame.Size = originalSize
-    frame.Position = UDim2.new(0.5, -250, 0.5, -150)
+    frame.Position = UDim2.new(0.5, -350, 0.5, -200)
     frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     frame.BorderSizePixel = 0
     frame.Active = true
@@ -62,7 +62,7 @@ end
 -- 상단 버튼 생성
 local function createTopButton(text, position, callback)
     local button = Instance.new("TextButton")
-    button.Size = UDim2.new(0, 90, 0, 30)
+    button.Size = UDim2.new(0, 120, 0, 30) -- 크기 조정
     button.Position = position
     button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
     button.Text = text
@@ -130,43 +130,43 @@ createTopButton("기본기능", UDim2.new(0, 10, 0, 40), function()
     end
 end)
 
-createTopButton("팽 부대", UDim2.new(0, 110, 0, 40), function()
+createTopButton("팽 부대", UDim2.new(0, 140, 0, 40), function()
     for _, frame in pairs(frames) do
         frame.Visible = frame.Name == "PangBudaeFrame"
     end
 end)
 
-createTopButton("밥밥 부대", UDim2.new(0, 210, 0, 40), function()
+createTopButton("밥밥 부대", UDim2.new(0, 270, 0, 40), function()
     for _, frame in pairs(frames) do
         frame.Visible = frame.Name == "BobBobBudaeFrame"
     end
 end)
 
-createTopButton("태비 부대", UDim2.new(0, 310, 0, 40), function()
+createTopButton("태비 부대", UDim2.new(0, 400, 0, 40), function()
     for _, frame in pairs(frames) do
         frame.Visible = frame.Name == "TabbyBudaeFrame"
     end
 end)
 
-createTopButton("샤크 부대", UDim2.new(0, 410, 0, 40), function()
+createTopButton("샤크 부대", UDim2.new(0, 530, 0, 40), function()
     for _, frame in pairs(frames) do
         frame.Visible = frame.Name == "SharkBudaeFrame"
     end
 end)
 
-createTopButton("프리즌 라이프", UDim2.new(0, 510, 0, 40), function()
+createTopButton("프리즌 라이프", UDim2.new(0, 660, 0, 40), function()
     for _, frame in pairs(frames) do
         frame.Visible = frame.Name == "PrisonLifeFrame"
     end
 end)
 
-createTopButton("아스털", UDim2.new(0, 610, 0, 40), function()
+createTopButton("아스털", UDim2.new(0, 790, 0, 40), function()
     for _, frame in pairs(frames) do
         frame.Visible = frame.Name == "AstellFrame"
     end
 end)
 
-createTopButton("스크립트 모음", UDim2.new(0, 710, 0, 40), function()
+createTopButton("스크립트 모음", UDim2.new(0, 920, 0, 40), function()
     for _, frame in pairs(frames) do
         frame.Visible = frame.Name == "ScriptCollectionFrame"
     end
