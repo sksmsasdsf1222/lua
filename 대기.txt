@@ -1,0 +1,268 @@
+-- 로블록스 서비스 가져오기
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+local UIS = game:GetService("UserInputService")
+
+-- 비밀번호 입력창 생성
+local function createPasswordScreen()
+    local passwordScreen = Instance.new("ScreenGui")
+    passwordScreen.Name = "PasswordScreen"
+    passwordScreen.Parent = playerGui
+    
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(0, 400, 0, 250)
+    mainFrame.Position = UDim2.new(0.5, -200, 0.5, -125)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    mainFrame.BorderSizePixel = 0
+    mainFrame.Parent = passwordScreen
+
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Size = UDim2.new(1, 0, 0, 50)
+    titleLabel.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    titleLabel.Text = "비밀번호 입력"
+    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleLabel.Font = Enum.Font.GothamBold
+    titleLabel.TextSize = 26
+    titleLabel.TextStrokeTransparency = 0.8
+    titleLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    titleLabel.Parent = mainFrame
+
+    local passwordBox = Instance.new("TextBox")
+    passwordBox.Size = UDim2.new(0.8, 0, 0, 40)
+    passwordBox.Position = UDim2.new(0.1, 0, 0.3, 0)
+    passwordBox.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    passwordBox.BorderSizePixel = 0
+    passwordBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    passwordBox.Font = Enum.Font.Gotham
+    passwordBox.TextSize = 20
+    passwordBox.Text = ""
+    passwordBox.ClearTextOnFocus = false
+    passwordBox.TextTransparency = 0.5
+    passwordBox.Parent = mainFrame
+
+    local submitButton = Instance.new("TextButton")
+    submitButton.Size = UDim2.new(0.8, 0, 0, 50)
+    submitButton.Position = UDim2.new(0.1, 0, 0.6, 0)
+    submitButton.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
+    submitButton.BorderSizePixel = 0
+    submitButton.Text = "제출"
+    submitButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    submitButton.Font = Enum.Font.GothamBold
+    submitButton.TextSize = 22
+    submitButton.TextStrokeTransparency = 0.8
+    submitButton.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    submitButton.Parent = mainFrame
+
+    return passwordScreen, passwordBox, submitButton
+end
+
+-- 사용자 GUI 생성 함수
+local function createUserGUI()
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "UserGui"
+    screenGui.Parent = playerGui
+
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(0, 600, 0, 400)
+    mainFrame.Position = UDim2.new(0.5, -300, 0.5, -200)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    mainFrame.BorderSizePixel = 0
+    mainFrame.Parent = screenGui
+
+    local titleBar = Instance.new("TextLabel")
+    titleBar.Size = UDim2.new(1, 0, 0, 50)
+    titleBar.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    titleBar.Text = "사용자 대시보드"
+    titleBar.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleBar.Font = Enum.Font.GothamBold
+    titleBar.TextSize = 28
+    titleBar.TextStrokeTransparency = 0.8
+    titleBar.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    titleBar.Parent = mainFrame
+
+    -- 왼쪽 사이드바 생성
+    local sidebar = Instance.new("Frame")
+    sidebar.Size = UDim2.new(0, 150, 1, -50)
+    sidebar.Position = UDim2.new(0, 0, 0, 50)
+    sidebar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    sidebar.BorderSizePixel = 0
+    sidebar.Parent = mainFrame
+
+    -- 컨텐츠 영역 생성
+    local contentFrame = Instance.new("Frame")
+    contentFrame.Size = UDim2.new(1, -150, 1, -50)
+    contentFrame.Position = UDim2.new(0, 150, 0, 50)
+    contentFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    contentFrame.BorderSizePixel = 0
+    contentFrame.Parent = mainFrame
+
+    -- 탭 버튼 생성 함수
+    local function createTabButton(text, position, content)
+        local tabButton = Instance.new("TextButton")
+        tabButton.Size = UDim2.new(1, -20, 0, 50)
+        tabButton.Position = position
+        tabButton.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+        tabButton.BorderSizePixel = 0
+        tabButton.Text = text
+        tabButton.TextColor3 = Color3.fromRGB(220, 220, 220)
+        tabButton.Font = Enum.Font.Gotham
+        tabButton.TextSize = 20
+        tabButton.TextStrokeTransparency = 0.8
+        tabButton.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+        tabButton.Parent = sidebar
+
+        tabButton.MouseButton1Click:Connect(function()
+            -- 모든 컨텐츠 숨기기
+            for _, child in pairs(contentFrame:GetChildren()) do
+                child.Visible = false
+            end
+            -- 클릭된 탭에 해당하는 컨텐츠만 보이게
+            content.Visible = true
+        end)
+    end
+
+    -- 컨텐츠 생성 함수
+    local function createContent(text)
+        local content = Instance.new("TextLabel")
+        content.Size = UDim2.new(1, -20, 1, -20)
+        content.Position = UDim2.new(0, 10, 0, 10)
+        content.BackgroundTransparency = 1
+        content.Text = text
+        content.TextColor3 = Color3.fromRGB(255, 255, 255)
+        content.Font = Enum.Font.Gotham
+        content.TextSize = 24
+        content.Visible = false
+        content.Parent = contentFrame
+        return content
+    end
+
+    -- 각 탭 버튼과 관련된 컨텐츠 생성
+    local homeContent = createContent("홈 화면입니다.")
+    createTabButton("홈", UDim2.new(0, 10, 0, 10), homeContent)
+    homeContent.Visible = true  -- 처음 시작할 때 홈 컨텐츠 보이도록
+
+    local exampleContent1 = createContent("예시 화면 1입니다.")
+    createTabButton("예시 1", UDim2.new(0, 10, 0, 70), exampleContent1)
+
+    local exampleContent2 = createContent("예시 화면 2입니다.")
+    createTabButton("예시 2", UDim2.new(0, 10, 0, 130), exampleContent2)
+end
+
+-- 관리자 GUI 생성 함수
+local function createAdminGUI()
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "AdminGui"
+    screenGui.Parent = playerGui
+
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(0, 600, 0, 400)
+    mainFrame.Position = UDim2.new(0.5, -300, 0.5, -200)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    mainFrame.BorderSizePixel = 0
+    mainFrame.Parent = screenGui
+
+    local titleBar = Instance.new("TextLabel")
+    titleBar.Size = UDim2.new(1, 0, 0, 50)
+    titleBar.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    titleBar.Text = "관리자 대시보드"
+    titleBar.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleBar.Font = Enum.Font.GothamBold
+    titleBar.TextSize = 28
+    titleBar.TextStrokeTransparency = 0.8
+    titleBar.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    titleBar.Parent = mainFrame
+
+    -- 왼쪽 사이드바 생성
+    local sidebar = Instance.new("Frame")
+    sidebar.Size = UDim2.new(0, 150, 1, -50)
+    sidebar.Position = UDim2.new(0, 0, 0, 50)
+    sidebar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    sidebar.BorderSizePixel = 0
+    sidebar.Parent = mainFrame
+
+    -- 컨텐츠 영역 생성
+    local contentFrame = Instance.new("Frame")
+    contentFrame.Size = UDim2.new(1, -150, 1, -50)
+    contentFrame.Position = UDim2.new(0, 150, 0, 50)
+    contentFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    contentFrame.BorderSizePixel = 0
+    contentFrame.Parent = mainFrame
+
+    -- 탭 버튼 생성 함수
+    local function createTabButton(text, position, content)
+        local tabButton = Instance.new("TextButton")
+        tabButton.Size = UDim2.new(1, -20, 0, 50)
+        tabButton.Position = position
+        tabButton.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+        tabButton.BorderSizePixel = 0
+        tabButton.Text = text
+        tabButton.TextColor3 = Color3.fromRGB(220, 220, 220)
+        tabButton.Font = Enum.Font.Gotham
+        tabButton.TextSize = 20
+        tabButton.TextStrokeTransparency = 0.8
+        tabButton.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+        tabButton.Parent = sidebar
+
+        tabButton.MouseButton1Click:Connect(function()
+            -- 모든 컨텐츠 숨기기
+            for _, child in pairs(contentFrame:GetChildren()) do
+                child.Visible = false
+            end
+            -- 클릭된 탭에 해당하는 컨텐츠만 보이게
+            content.Visible = true
+        end)
+    end
+
+    -- 컨텐츠 생성 함수
+    local function createContent(text)
+        local content = Instance.new("TextLabel")
+        content.Size = UDim2.new(1, -20, 1, -20)
+        content.Position = UDim2.new(0, 10, 0, 10)
+        content.BackgroundTransparency = 1
+        content.Text = text
+        content.TextColor3 = Color3.fromRGB(255, 255, 255)
+        content.Font = Enum.Font.Gotham
+        content.TextSize = 24
+        content.Visible = false
+        content.Parent = contentFrame
+        return content
+    end
+
+    -- 각 탭 버튼과 관련된 컨텐츠 생성
+    local homeContent = createContent("관리자 홈 화면입니다.")
+    createTabButton("홈", UDim2.new(0, 10, 0, 10), homeContent)
+    homeContent.Visible = true  -- 처음 시작할 때 홈 컨텐츠 보이도록
+
+    local exampleContent1 = createContent("관리자 예시 화면 1입니다.")
+    createTabButton("예시 1", UDim2.new(0, 10, 0, 70), exampleContent1)
+
+    local exampleContent2 = createContent("관리자 예시 화면 2입니다.")
+    createTabButton("예시 2", UDim2.new(0, 10, 0, 130), exampleContent2)
+end
+
+-- 비밀번호 확인 및 GUI 전환
+local function onPasswordSubmit(passwordBox, passwordScreen)
+    local correctPasswordUser = "userpass"  -- 사용자의 비밀번호
+    local correctPasswordAdmin = "adminpass"  -- 관리자의 비밀번호
+
+    local password = passwordBox.Text
+
+    if password == correctPasswordUser then
+        passwordScreen:Destroy()  -- 비밀번호 입력 화면 제거
+        createUserGUI()  -- 사용자 GUI 생성
+    elseif password == correctPasswordAdmin then
+        passwordScreen:Destroy()  -- 비밀번호 입력 화면 제거
+        createAdminGUI()  -- 관리자 GUI 생성
+    else
+        -- 비밀번호가 틀렸을 때 처리
+        print("비밀번호가 틀렸습니다.")
+        passwordBox.Text = ""  -- 비밀번호 박스 지우기
+    end
+end
+
+-- 메인 실행 로직
+local passwordScreen, passwordBox, submitButton = createPasswordScreen()
+submitButton.MouseButton1Click:Connect(function()
+    onPasswordSubmit(passwordBox, passwordScreen)
+end)
