@@ -1,0 +1,156 @@
+-- 로블록스 서비스 가져오기
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+local UIS = game:GetService("UserInputService")
+
+-- 곡선 모서리를 지원하는 함수
+local function setRoundedCorners(frame, radius)
+    frame.ClipsDescendants = true
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, radius)
+    corner.Parent = frame
+end
+
+-- X 버튼 생성 함수
+local function createCloseButton(parent)
+    local closeButton = Instance.new("TextButton")
+    closeButton.Size = UDim2.new(0, 40, 0, 40)
+    closeButton.Position = UDim2.new(1, -50, 0, 10)
+    closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    closeButton.BorderSizePixel = 0
+    closeButton.Text = "X"
+    closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    closeButton.Font = Enum.Font.GothamBold
+    closeButton.TextSize = 24
+    closeButton.TextStrokeTransparency = 0.8
+    closeButton.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    closeButton.Parent = parent
+
+    closeButton.MouseButton1Click:Connect(function()
+        parent:Destroy()
+    end)
+    
+    return closeButton
+end
+
+-- 비밀번호 입력창 생성
+local function createPasswordScreen()
+    local passwordScreen = Instance.new("ScreenGui")
+    passwordScreen.Name = "PasswordScreen"
+    passwordScreen.Parent = playerGui
+
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(0, 400, 0, 250)
+    mainFrame.Position = UDim2.new(0.5, -200, 0.5, -125)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    mainFrame.BorderSizePixel = 0
+    setRoundedCorners(mainFrame, 20)  -- 곡선 모서리 설정
+    mainFrame.Parent = passwordScreen
+
+    createCloseButton(mainFrame)  -- X 버튼 추가
+
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Size = UDim2.new(1, 0, 0, 50)
+    titleLabel.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    titleLabel.Text = "[ KR ] Verification"
+    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleLabel.Font = Enum.Font.GothamBold
+    titleLabel.TextSize = 26
+    titleLabel.TextStrokeTransparency = 0.8
+    titleLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    titleLabel.Parent = mainFrame
+
+    local passwordBox = Instance.new("TextBox")
+    passwordBox.Size = UDim2.new(0.8, 0, 0, 40)
+    passwordBox.Position = UDim2.new(0.1, 0, 0.3, 0)
+    passwordBox.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    passwordBox.BorderSizePixel = 0
+    passwordBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    passwordBox.Font = Enum.Font.Gotham
+    passwordBox.TextSize = 20
+    passwordBox.Text = ""
+    passwordBox.ClearTextOnFocus = false
+    passwordBox.TextTransparency = 0.5
+    setRoundedCorners(passwordBox, 15)  -- 곡선 모서리 설정
+    passwordBox.Parent = mainFrame
+
+    local submitButton = Instance.new("TextButton")
+    submitButton.Size = UDim2.new(0.8, 0, 0, 50)
+    submitButton.Position = UDim2.new(0.1, 0, 0.6, 0)
+    submitButton.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
+    submitButton.BorderSizePixel = 0
+    submitButton.Text = "완료"
+    submitButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    submitButton.Font = Enum.Font.GothamBold
+    submitButton.TextSize = 22
+    submitButton.TextStrokeTransparency = 0.8
+    submitButton.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    setRoundedCorners(submitButton, 15)  -- 곡선 모서리 설정
+    submitButton.Parent = mainFrame
+
+    return passwordScreen, passwordBox, submitButton, titleLabel
+end
+
+-- 성공 화면 생성 함수
+local function createSuccessScreen()
+    local successScreen = Instance.new("ScreenGui")
+    successScreen.Name = "SuccessScreen"
+    successScreen.Parent = playerGui
+
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(0.5, 0, 0.5, 0)
+    mainFrame.Position = UDim2.new(0.25, 0, 0.25, 0)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    mainFrame.BorderSizePixel = 0
+    setRoundedCorners(mainFrame, 20)  -- 곡선 모서리 설정
+    mainFrame.Parent = successScreen
+
+    createCloseButton(mainFrame)  -- X 버튼 추가
+
+    local successLabel = Instance.new("TextLabel")
+    successLabel.Size = UDim2.new(1, 0, 1, 0)
+    successLabel.BackgroundTransparency = 1
+    successLabel.Text = "안녕"
+    successLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
+    successLabel.Font = Enum.Font.GothamBold
+    successLabel.TextSize = 60
+    successLabel.TextStrokeTransparency = 0.8
+    successLabel.TextStrokeColor3 = Color3.fromRGB(255, 255, 255)
+    successLabel.Parent = mainFrame
+end
+
+-- 비밀번호 확인 및 GUI 전환
+local function onPasswordSubmit(passwordBox, passwordScreen, titleLabel)
+    local correctPasswordUser = "userpass"  -- 사용자의 비밀번호
+    local correctPasswordAdmin = "adminpass"  -- 관리자의 비밀번호
+
+    local password = passwordBox.Text
+
+    if password == correctPasswordUser or password == correctPasswordAdmin then
+        -- 성공한 경우
+        passwordScreen:Destroy()  -- 비밀번호 입력 화면 제거
+        createSuccessScreen()  -- 성공 화면 생성
+    else
+        -- 실패한 경우
+        passwordBox.Text = ""  -- 비밀번호 박스 지우기
+        titleLabel.Text = "[ KR ] Verification"
+        local errorMessage = Instance.new("TextLabel")
+        errorMessage.Size = UDim2.new(1, 0, 0, 50)
+        errorMessage.Position = UDim2.new(0, 0, 0.7, 0)
+        errorMessage.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+        errorMessage.Text = "비밀번호를 틀렸습니다."
+        errorMessage.TextColor3 = Color3.fromRGB(255, 255, 255)
+        errorMessage.Font = Enum.Font.GothamBold
+        errorMessage.TextSize = 20
+        errorMessage.TextStrokeTransparency = 0.8
+        errorMessage.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+        errorMessage.Parent = passwordScreen
+    end
+end
+
+-- 메인 실행 로직
+local passwordScreen, passwordBox, submitButton, titleLabel = createPasswordScreen()
+submitButton.MouseButton1Click:Connect(function()
+    onPasswordSubmit(passwordBox, passwordScreen, titleLabel)
+end)
