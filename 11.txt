@@ -7,6 +7,9 @@ local screenGui = frame.Parent
 local adminPassword = "admin"
 local userPassword = "user"
 
+-- 실패 메시지 프레임
+local failureFrame = screenGui:WaitForChild("FailureFrame")
+
 -- 버튼 클릭 이벤트 처리
 submitButton.MouseButton1Click:Connect(function()
     local inputText = textBox.Text
@@ -43,7 +46,9 @@ submitButton.MouseButton1Click:Connect(function()
         local tween = tweenService:Create(successFrame, tweenInfo, goal)
         tween:Play()
     else
-        -- 비밀번호가 틀리면 (선택 사항)
-        print("잘못된 비밀번호입니다.")
+        -- 비밀번호가 틀리면
+        textBox.Text = ""
+        frame.Visible = false
+        failureFrame.Visible = true
     end
 end)
