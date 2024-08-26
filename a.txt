@@ -1,0 +1,83 @@
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- GUI Setup
+local keyGui = Instance.new("ScreenGui")
+keyGui.Parent = playerGui
+keyGui.ResetOnSpawn = false
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0.3, 0, 0.2, 0)
+frame.Position = UDim2.new(0.5, 0, 0.5, 0)
+frame.AnchorPoint = Vector2.new(0.5, 0.5)
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+frame.BackgroundTransparency = 0.2
+frame.Parent = keyGui
+
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Size = UDim2.new(1, -10, 0, 20)
+titleLabel.Position = UDim2.new(0.5, 0, 0, 10)
+titleLabel.AnchorPoint = Vector2.new(0.5, 0)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Text = "초보 스크립트 🔒 키"
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleLabel.Font = Enum.Font.GothamBold
+titleLabel.TextSize = 14
+titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+titleLabel.Parent = frame
+
+local noteLabel = Instance.new("TextLabel")
+noteLabel.Size = UDim2.new(0.5, 0, 0, 20)
+noteLabel.Position = UDim2.new(1, -10, 0, 10)
+noteLabel.AnchorPoint = Vector2.new(1, 0)
+noteLabel.BackgroundTransparency = 1
+noteLabel.Text = "Note\njoin my discord"
+noteLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+noteLabel.Font = Enum.Font.Gotham
+noteLabel.TextSize = 12
+noteLabel.TextXAlignment = Enum.TextXAlignment.Right
+noteLabel.Parent = frame
+
+local keyBox = Instance.new("TextBox")
+keyBox.Size = UDim2.new(0.9, 0, 0.3, 0)
+keyBox.Position = UDim2.new(0.5, 0, 0.5, 0)
+keyBox.AnchorPoint = Vector2.new(0.5, 0.5)
+keyBox.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+keyBox.BorderSizePixel = 0
+keyBox.Text = "key"
+keyBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+keyBox.Font = Enum.Font.Gotham
+keyBox.TextSize = 14
+keyBox.Parent = frame
+
+-- Optional: Close button
+local closeButton = Instance.new("TextButton")
+closeButton.Size = UDim2.new(0.1, 0, 0.1, 0)
+closeButton.Position = UDim2.new(1, -5, 0, 5)
+closeButton.AnchorPoint = Vector2.new(1, 0)
+closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+closeButton.Text = "X"
+closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeButton.Font = Enum.Font.GothamBold
+closeButton.TextSize = 14
+closeButton.Parent = frame
+
+closeButton.MouseButton1Click:Connect(function()
+    keyGui:Destroy()
+end)
+
+-- You can add functionality here for when the user enters the correct key
+keyBox.FocusLost:Connect(function(enterPressed)
+    if enterPressed then
+        local enteredKey = keyBox.Text
+        if enteredKey == "yourPassword" then
+            -- Correct Key Action
+            print("Access Granted!")
+            keyGui:Destroy()  -- Optional: close the GUI after correct input
+        else
+            -- Incorrect Key Action
+            print("Access Denied!")
+        end
+    end
+end)
